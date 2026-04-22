@@ -1,16 +1,16 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native';
+import { View, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator, KeyboardAvoidingView, Platform } from 'react-native';
 import { useAuth } from '@/context/auth';
-import axios from 'axios';
-import { Platform } from 'react-native';
-
-const API_URL = Platform.OS === 'android' ? 'http://10.0.2.2:3000' : 'http://localhost:3000';
+import { Stack } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
+import { Palette, Spacing } from '@/constants/Theme';
+import { H1, Body, Label, PrimaryButton } from '@/components/DesignSystem';
 
 export default function LoginScreen() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState<string | null>(null);
   
   const { signIn } = useAuth();
 
@@ -21,136 +21,126 @@ export default function LoginScreen() {
     }
     
     setLoading(true);
-    setError('');
-    
+    setError(null);
     try {
-      console.log('LOGIN URL:', API_URL + '/auth/login');
-      console.log('LOGIN PAYLOAD:', { username, password });
-      
-      const response = await axios.post(`${API_URL}/auth/login`, {
-        username,
-        password,
-      });
-      
-      const { access_token, user } = response.data;
-      await signIn(access_token, user);
-      
-    } catch (error: any) {
-      console.log('LOGIN ERROR STATUS:', error?.response?.status);
-      console.log('LOGIN ERROR DATA:', error?.response?.data);
-      console.log('LOGIN ERROR MESSAGE:', error?.message);
-      setError(error?.response?.data?.message || 'Failed to login. Please check your credentials.');
+      await signIn(username, password);
+    } catch (e: any) {
+      setError(e.response?.data?.message || 'Invalid username or password');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>School Portal</Text>
-      <Text style={styles.subtitle}>Sign in to your account</Text>
+    <KeyboardAvoidingView 
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'} 
+      style={s.main}
+    >
+      <Stack.Screen options={{ headerShown: false }} />
       
-      {error ? <Text style={styles.error}>{error}</Text> : null}
-      
-      <View style={styles.inputContainer}>
-        <Text style={styles.label}>Username</Text>
-        <TextInput
-          style={styles.input}
-          value={username}
-          onChangeText={setUsername}
-          autoCapitalize="none"
-          placeholder="Enter username"
-        />
+      <View style={s.container}>
+        {/* Branding Section */}
+        <View style={s.brandSection}>
+          <View style={s.logoBox}>
+            <Ionicons name="school" size={40} color={Palette.primary} />
+          </View>
+          <H1 style={s.brandTitle}>Iqra Academy</H1>
+          <Body style={s.brandSub}>Nurturing minds with wisdom and grace.</Body>
+        </View>
+
+        {/* Login Form */}
+        <View style={s.form}>
+          <View style={s.inputGroup}>
+            <Label style={s.inputLabel}>Credential / ID</Label>
+            <View style={s.inputBox}>
+              <Ionicons name="person-outline" size={20} color={Palette.muted} />
+              <TextInput
+                style={s.input}
+                placeholder="Student ID or Faculty Code"
+                placeholderTextColor={Palette.muted}
+                value={username}
+                onChangeText={setUsername}
+                autoCapitalize="none"
+              />
+            </View>
+          </View>
+
+          <View style={s.inputGroup}>
+            <Label style={s.inputLabel}>Access Key</Label>
+            <View style={s.inputBox}>
+              <Ionicons name="lock-closed-outline" size={20} color={Palette.muted} />
+              <TextInput
+                style={s.input}
+                placeholder="••••••••"
+                placeholderTextColor={Palette.muted}
+                value={password}
+                onChangeText={setPassword}
+                secureTextEntry
+              />
+            </View>
+          </View>
+
+          {error && (
+            <View style={s.errorBox}>
+               <Ionicons name="alert-circle" size={16} color={Palette.danger} />
+               <Label style={{ color: Palette.danger, textTransform: 'none' }}>{error}</Label>
+            </View>
+          )}
+
+          <PrimaryButton 
+            title="Secure Login" 
+            onPress={handleLogin} 
+            loading={loading}
+          />
+
+          <TouchableOpacity style={s.forgotBtn}>
+            <Label style={s.forgotText}>Request Access Support →</Label>
+          </TouchableOpacity>
+        </View>
+
+        {/* Trust Footer */}
+        <View style={s.footer}>
+          <Ionicons name="shield-checkmark" size={16} color={Palette.muted} />
+          <Label style={s.footerText}>Secure Educational Gateway</Label>
+        </View>
       </View>
-      
-      <View style={styles.inputContainer}>
-        <Text style={styles.label}>Password</Text>
-        <TextInput
-          style={styles.input}
-          value={password}
-          onChangeText={setPassword}
-          secureTextEntry
-          placeholder="Enter password"
-        />
-      </View>
-      
-      <TouchableOpacity 
-        style={styles.button} 
-        onPress={handleLogin}
-        disabled={loading}
-      >
-        {loading ? (
-          <ActivityIndicator color="white" />
-        ) : (
-          <Text style={styles.buttonText}>Log In</Text>
-        )}
-      </TouchableOpacity>
-      
-      <View style={styles.helpText}>
-        <Text>Mock users: headmaster / teacher / parent</Text>
-        <Text>Password: password</Text>
-      </View>
-    </View>
+    </KeyboardAvoidingView>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 20,
-    justifyContent: 'center',
-    backgroundColor: '#fff',
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    marginBottom: 8,
-    color: '#333',
-    textAlign: 'center',
-  },
-  subtitle: {
-    fontSize: 16,
-    color: '#666',
-    marginBottom: 32,
-    textAlign: 'center',
-  },
-  inputContainer: {
-    marginBottom: 16,
-  },
-  label: {
-    marginBottom: 8,
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#333',
-  },
-  input: {
+const s = StyleSheet.create({
+  main: { flex: 1, backgroundColor: Palette.surface },
+  container: { flex: 1, padding: Spacing.xl, justifyContent: 'center' },
+  brandSection: { alignItems: 'center', marginBottom: Spacing.xxl },
+  logoBox: { 
+    width: 80, 
+    height: 80, 
+    borderRadius: 20, 
+    backgroundColor: Palette.white, 
+    justifyContent: 'center', 
+    alignItems: 'center',
+    marginBottom: Spacing.m,
     borderWidth: 1,
-    borderColor: '#ccc',
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    borderRadius: 8,
-    fontSize: 16,
+    borderColor: Palette.border
   },
-  button: {
-    backgroundColor: '#0066cc',
-    paddingVertical: 14,
-    borderRadius: 8,
-    alignItems: 'center',
-    marginTop: 16,
+  brandTitle: { color: Palette.text, textAlign: 'center' },
+  brandSub: { color: Palette.muted, textAlign: 'center', marginTop: Spacing.xs },
+  form: { gap: Spacing.l },
+  inputGroup: { gap: Spacing.s },
+  inputLabel: { fontWeight: '600', color: Palette.text },
+  inputBox: { 
+    flexDirection: 'row', 
+    alignItems: 'center', 
+    borderWidth: 1, 
+    borderColor: Palette.border, 
+    borderRadius: 12, 
+    paddingHorizontal: Spacing.m,
+    backgroundColor: Palette.white
   },
-  buttonText: {
-    color: 'white',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  error: {
-    color: 'red',
-    marginBottom: 16,
-    textAlign: 'center',
-  },
-  helpText: {
-    marginTop: 32,
-    alignItems: 'center',
-    opacity: 0.6,
-  }
+  input: { flex: 1, paddingVertical: Spacing.m, marginLeft: Spacing.s, fontSize: 16, color: Palette.text },
+  errorBox: { flexDirection: 'row', alignItems: 'center', gap: Spacing.s, backgroundColor: Palette.danger + '10', padding: Spacing.m, borderRadius: 8 },
+  forgotBtn: { alignSelf: 'center', marginTop: Spacing.s },
+  forgotText: { color: Palette.primary, textTransform: 'none', fontWeight: '700' },
+  footer: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: Spacing.s, marginTop: Spacing.xxxl, opacity: 0.5 },
+  footerText: { fontSize: 12, color: Palette.muted, textTransform: 'none' }
 });

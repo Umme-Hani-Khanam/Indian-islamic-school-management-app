@@ -17,6 +17,9 @@ export interface Teacher {
   userId: string;
   employeeId: string;
   department: string;
+  performanceRanking?: number;
+  guidanceEfficiency?: number;
+  monthlyScore?: number;
 }
 
 export interface Subject {
@@ -43,7 +46,8 @@ export interface Marks {
   id: string;
   studentId: string;
   subjectId: string;
-  date: string; // ISO string
+  teacherId: string;
+  date: string; // ISO string 
   score: number;
   total: number;
   examType: string;
@@ -55,6 +59,64 @@ export interface Remarks {
   teacherId: string;
   date: string;
   comment: string;
+  type: 'POSITIVE' | 'NEGATIVE';
+}
+
+export interface DisciplineIssue {
+  id: string;
+  studentId: string;
+  date: string;
+  description: string;
+  severity: 'MINOR' | 'MAJOR' | 'RED_ALERT';
+  raisedBy: 'CHILD' | 'OTHER';
+  proofImageUrl?: string;
+}
+
+export interface HomeworkTask {
+  id: string;
+  studentId: string;
+  subjectId: string;
+  title: string;
+  isCompleted: boolean;
+}
+
+export interface DailyPerformance {
+  date: string;
+  score: number; // e.g. out of 100
+}
+
+export interface MonthlyProgress {
+  month: string;
+  score: number;
+}
+
+export interface AssignedTeacher {
+  teacher: Teacher;
+  subject: Subject;
+}
+
+export interface AlertHistory {
+  date: string;
+  status: 'OPEN' | 'IN_PROGRESS' | 'RESOLVED';
+  note: string;
+  updatedBy: string; // userId
+}
+
+export interface Alert {
+  id: string;
+  studentId: string;
+  title: string;
+  description: string;
+  priority: 'CRITICAL' | 'HIGH' | 'MEDIUM';
+  status: 'OPEN' | 'IN_PROGRESS' | 'RESOLVED';
+  raisedByRole: 'HEADMASTER' | 'TEACHER' | 'PARENT';
+  createdByUserId: string;
+  assignedResolverId?: string;
+  resolvedByUserId?: string;
+  proofImageUrl?: string;
+  history: AlertHistory[];
+  createdAt: string;
+  updatedAt: string;
 }
 
 // Full profile response aggregate
@@ -64,6 +126,14 @@ export interface StudentProfileResponse {
   subjects: { subject: Subject; marks: Marks[] }[];
   attendance: Attendance[];
   remarks: Remarks[];
+  positiveRemarks: Remarks[];
+  negativeRemarks: Remarks[];
+  alerts: Alert[]; // Unified alerts
+  dailyPerformance: DailyPerformance[];
+  monthlyProgress: MonthlyProgress[];
+  assignedTeachers: AssignedTeacher[];
+  homeworkTasks: HomeworkTask[];
+  ratingScore: number;
 }
 
 export interface ClassResponse {
@@ -76,4 +146,13 @@ export interface StudentResponse {
   id: string;
   name: string;
   rollNumber: string;
+}
+
+export interface SchoolOverview {
+  enrollmentCount: number;
+  classCount: number;
+  teacherCount: number;
+  criticalAlerts: number;
+  staffAttendance: string;
+  weakPerformanceClasses: string[];
 }

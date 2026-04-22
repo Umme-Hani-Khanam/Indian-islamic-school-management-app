@@ -18,6 +18,7 @@ exports.SchoolModule = SchoolModule = __decorate([
     (0, common_1.Module)({
         controllers: [school_controller_1.SchoolController],
         providers: [school_service_1.SchoolService, mock_school_repository_1.MockSchoolRepository],
+        exports: [mock_school_repository_1.MockSchoolRepository],
     })
 ], SchoolModule);
 //# sourceMappingURL=school.module.js.map

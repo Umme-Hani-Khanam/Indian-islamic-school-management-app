@@ -1,7 +1,13 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, FlatList, ActivityIndicator, TouchableOpacity } from 'react-native';
+import React, { useEffect, useState, useCallback } from 'react';
+import { View, StyleSheet, FlatList, RefreshControl } from 'react-native';
 import { api } from '@/utils/api';
 import { useRouter } from 'expo-router';
+import { Palette, Spacing } from '@/constants/Theme';
+import { 
+  Surface, Card, Title, Body, Label, 
+  SkeletonCard, EmptyState, ErrorState 
+} from '@/components/DesignSystem';
+import { Ionicons } from '@expo/vector-icons';
 
 interface ClassData {
   id: string;
@@ -13,103 +19,121 @@ export default function ClassListScreen() {
   const [classes, setClasses] = useState<ClassData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [refreshing, setRefreshing] = useState(false);
   const router = useRouter();
 
-  useEffect(() => {
-    const fetchClasses = async () => {
-      try {
-        const response = await api.get('/school/classes');
-        setClasses(response.data);
-      } catch (err: any) {
-        setError(err.response?.data?.message || 'Failed to load classes.');
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchClasses();
+  const fetchClasses = useCallback(async () => {
+    try {
+      const response = await api.get('/school/classes');
+      setClasses(Array.isArray(response.data) ? response.data : []);
+      setError(null);
+    } catch (err: any) {
+      if (__DEV__) console.log('[DEV] Class Fetch Error:', err.message, err.response?.data);
+      setError(err.response?.data?.message || 'We encountered an error while retrieving the class records.');
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
   }, []);
 
-  if (loading) {
+  useEffect(() => {
+    fetchClasses();
+  }, [fetchClasses]);
+
+  const handleRetry = () => {
+    setLoading(true);
+    setError(null);
+    setClasses([]);
+    fetchClasses();
+  };
+
+  const onRefresh = () => {
+    setRefreshing(true);
+    fetchClasses();
+  };
+
+  if (loading && classes.length === 0) {
     return (
-      <View style={styles.centered}>
-        <ActivityIndicator size="large" color="#0066cc" />
-      </View>
+      <Surface style={styles.container}>
+        <View style={styles.header}>
+            <Title>Academic Classes</Title>
+            <Label style={{ color: Palette.muted }}>Listing all active sections</Label>
+        </View>
+        <View style={{ padding: Spacing.l }}>
+          <SkeletonCard />
+          <SkeletonCard />
+          <SkeletonCard />
+          <SkeletonCard />
+        </View>
+      </Surface>
     );
   }
 
   if (error) {
     return (
-      <View style={styles.centered}>
-        <Text style={styles.errorText}>{error}</Text>
-      </View>
+      <Surface style={styles.container}>
+        <ErrorState message={error} onRetry={handleRetry} />
+      </Surface>
     );
   }
 
-  if (classes.length === 0) {
-    return (
-      <View style={styles.centered}>
-        <Text style={styles.emptyText}>No classes to show.</Text>
-      </View>
-    );
-  }
+  const safeClasses = Array.isArray(classes) ? classes : [];
 
   return (
-    <FlatList
-      data={classes}
-      keyExtractor={(item) => item.id}
-      contentContainerStyle={styles.list}
-      renderItem={({ item }) => (
-        <TouchableOpacity 
-          style={styles.card}
-          onPress={() => router.push(`/(protected)/(tabs)/classes/${item.id}/students`)}
-        >
-          <Text style={styles.cardTitle}>{item.name}</Text>
-          <Text style={styles.cardSubtitle}>Section: {item.section}</Text>
-        </TouchableOpacity>
-      )}
-    />
+    <Surface style={styles.container}>
+      <FlatList
+        data={safeClasses}
+        keyExtractor={(item) => item.id}
+        contentContainerStyle={styles.list}
+        ListHeaderComponent={
+          <View style={styles.header}>
+            <Title>Academic Classes</Title>
+            <Label style={{ color: Palette.muted }}>Listing all active sections</Label>
+          </View>
+        }
+        ListEmptyComponent={
+          <EmptyState 
+            title="No Classes Found" 
+            message="There are currently no active sections or categories recorded in the system." 
+          />
+        }
+        refreshControl={
+          <RefreshControl 
+            refreshing={refreshing} 
+            onRefresh={onRefresh} 
+            tintColor={Palette.primary} 
+          />
+        }
+        renderItem={({ item }) => (
+          <Card 
+            style={styles.card}
+            pressable
+            onPress={() => router.push(`/(protected)/(tabs)/classes/${item.id}/student`)}
+          >
+            <View style={styles.cardRow}>
+                <View style={styles.iconBox}>
+                    <Ionicons name="school" size={24} color={Palette.primary} />
+                </View>
+                <View style={{ flex: 1 }}>
+                    <Title style={styles.cardTitle}>{item.name}</Title>
+                    <Body style={styles.cardSubtitle}>Section {item.section}</Body>
+                </View>
+                <Ionicons name="chevron-forward" size={20} color={Palette.border} />
+            </View>
+          </Card>
+        )}
+      />
+    </Surface>
   );
 }
 
 const styles = StyleSheet.create({
-  centered: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20,
-  },
-  list: {
-    padding: 16,
-  },
-  card: {
-    backgroundColor: '#ffffff',
-    padding: 20,
-    borderRadius: 12,
-    marginBottom: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
-    borderColor: '#eee',
-    borderWidth: 1,
-  },
-  cardTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#333',
-  },
-  cardSubtitle: {
-    fontSize: 16,
-    color: '#666',
-    marginTop: 4,
-  },
-  errorText: {
-    color: '#dc3545',
-    fontSize: 16,
-  },
-  emptyText: {
-    color: '#888',
-    fontSize: 16,
-  }
+  container: { flex: 1 },
+  header: { padding: Spacing.l, paddingTop: Spacing.xl },
+  list: { paddingBottom: Spacing.xl },
+  card: { marginHorizontal: Spacing.l, marginBottom: Spacing.m },
+  cardRow: { flexDirection: 'row', alignItems: 'center', gap: Spacing.m },
+  iconBox: { width: 48, height: 48, borderRadius: 12, backgroundColor: Palette.primary + '10', justifyContent: 'center', alignItems: 'center' },
+  cardTitle: { fontSize: 18, color: Palette.text },
+  cardSubtitle: { fontSize: 13, color: Palette.muted, marginTop: 2 },
 });

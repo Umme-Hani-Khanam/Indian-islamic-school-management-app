@@ -1,42 +1,33 @@
-import { View, Text, StyleSheet, Button } from 'react-native';
+import { View, StyleSheet, Button } from 'react-native';
 import { useAuth } from '@/context/auth';
+import TeacherDashboard from '@/components/TeacherDashboard';
+import HeadmasterDashboard from '@/components/HeadmasterDashboard';
+import ParentDashboard from '@/components/ParentDashboard';
 
 export default function DashboardScreen() {
   const { user, signOut } = useAuth();
-  
-  return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Dashboard</Text>
-      <Text style={styles.subtitle}>Welcome {user?.name} ({user?.role})</Text>
-      
-      <View style={styles.buttonContainer}>
-         <Button title="Logout" onPress={signOut} color="#dc3545" />
-      </View>
+
+  if (user?.role === 'TEACHER') return (
+    <View style={s.wrap}>
+      <TeacherDashboard />
     </View>
   );
+
+  if (user?.role === 'HEADMASTER') return (
+    <View style={s.wrap}>
+      <HeadmasterDashboard />
+    </View>
+  );
+
+  if (user?.role === 'PARENT') return (
+    <View style={s.wrap}>
+      <ParentDashboard />
+    </View>
+  );
+
+  return <View style={s.wrap} />;
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 20,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    marginBottom: 10,
-  },
-  subtitle: {
-    fontSize: 18,
-    color: '#666',
-    marginBottom: 40,
-  },
-  buttonContainer: {
-    marginTop: 20,
-    width: '100%',
-    maxWidth: 200,
-  }
+const s = StyleSheet.create({
+  wrap: { flex: 1, backgroundColor: '#f5f5f5' },
 });

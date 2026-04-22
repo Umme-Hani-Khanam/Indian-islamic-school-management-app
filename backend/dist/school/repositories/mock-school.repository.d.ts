@@ -1,4 +1,4 @@
-import { Class, Student, StudentProfileResponse } from '../interfaces/school.interface';
+import { Class, Student, Teacher, Marks, Remarks, StudentProfileResponse } from '../interfaces/school.interface';
 export declare class MockSchoolRepository {
     private classes;
     private students;
@@ -8,6 +8,10 @@ export declare class MockSchoolRepository {
     private attendance;
     private marks;
     private remarks;
+    private alerts;
+    private homeworkTasks;
+    private dailyPerformances;
+    private monthlyProgresses;
     getAllClasses(): Class[];
     getClassesByTeacher(userId: string): Class[];
     getClassById(classId: string): Class | undefined;
@@ -16,4 +20,13 @@ export declare class MockSchoolRepository {
     getStudentsByParent(parentId: string): Student[];
     getStudentById(studentId: string): Student | undefined;
     getStudentProfile(studentId: string): StudentProfileResponse;
+    getTeacherByUserId(userId: string): Teacher | undefined;
+    addMark(studentId: string, subjectId: string, teacherId: string, score: number): Marks;
+    addRemark(studentId: string, teacherId: string, comment: string, type: 'POSITIVE' | 'NEGATIVE'): Remarks;
+    getAllAlerts(): Alert[];
+    getAlertById(id: string): Alert | undefined;
+    getAlertsByStudent(studentId: string): Alert[];
+    getAlertsByClass(classId: string): Alert[];
+    addAlert(dto: Omit<Alert, 'id' | 'createdAt' | 'updatedAt' | 'history'>): Alert;
+    updateAlert(id: string, update: Partial<Alert>, updatedBy: string): Alert;
 }

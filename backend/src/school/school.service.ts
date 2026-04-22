@@ -1,13 +1,14 @@
 import { Injectable, ForbiddenException } from '@nestjs/common';
 import { MockSchoolRepository } from './repositories/mock-school.repository';
-import { Class, Student, StudentProfileResponse } from './interfaces/school.interface';
+import { Class, Student, StudentProfileResponse, SchoolOverview } from './interfaces/school.interface';
 
 @Injectable()
 export class SchoolService {
   constructor(private readonly repository: MockSchoolRepository) {}
 
   getClasses(user: any): Class[] {
-    const { role, sub: userId } = user;
+    const userId = user.userId || user.sub;
+    const { role } = user;
     if (role === 'HEADMASTER') {
       return this.repository.getAllClasses();
     }
@@ -19,7 +20,8 @@ export class SchoolService {
   }
 
   getStudents(classId: string, user: any): Student[] {
-    const { role, sub: userId } = user;
+    const userId = user.userId || user.sub;
+    const { role } = user;
     if (role === 'HEADMASTER') {
       return this.repository.getStudentsByClass(classId);
     }
@@ -38,7 +40,8 @@ export class SchoolService {
   }
 
   getStudentProfile(studentId: string, user: any): StudentProfileResponse {
-    const { role, sub: userId } = user;
+    const userId = user.userId || user.sub;
+    const { role } = user;
     
     // Check authorization boundary
     if (role === 'TEACHER') {
@@ -57,5 +60,21 @@ export class SchoolService {
     }
 
     return this.repository.getStudentProfile(studentId);
+  }
+
+  getOverview(user: any): SchoolOverview {
+    const { role } = user;
+    if (role !== 'HEADMASTER') {
+      throw new ForbiddenException('Only institutional heads can access this overview.');
+    }
+
+    return {
+      enrollmentCount: this.repository.getStudentCount(),
+      classCount: this.repository.getClassCount(),
+      teacherCount: this.repository.getTeacherCount(),
+      criticalAlerts: this.repository.getCriticalAlertsCount(),
+      staffAttendance: '98.5%', // Mocking global staff attendance
+      weakPerformanceClasses: ['Grade 8-B', 'Grade 10-A'], // Mocking watchlist
+    };
   }
 }

@@ -8,6 +8,12 @@ import { Roles } from '../auth/decorators/roles.decorator';
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class SchoolController {
   constructor(private readonly schoolService: SchoolService) {}
+  
+  @Get('overview')
+  @Roles('HEADMASTER')
+  getOverview(@Request() req) {
+    return this.schoolService.getOverview(req.user);
+  }
 
   @Get('classes')
   @Roles('HEADMASTER', 'TEACHER')

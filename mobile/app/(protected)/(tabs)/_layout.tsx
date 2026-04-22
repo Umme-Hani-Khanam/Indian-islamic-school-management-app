@@ -11,6 +11,9 @@ function TabBarIcon(props: {
 }
 
 export default function TabLayout() {
+  const { user } = useAuth();
+  const isParent = user?.role === 'PARENT';
+
   return (
     <Tabs screenOptions={{ headerShown: true }}>
       <Tabs.Screen
@@ -24,7 +27,8 @@ export default function TabLayout() {
         name="classes"
         options={{
           title: 'Classes',
-          headerShown: false, // The stack will maintain its own headers
+          href: isParent ? null : '/classes',
+          headerShown: false,
           tabBarIcon: ({ color }) => <TabBarIcon name="book" color={color} />,
         }}
       />

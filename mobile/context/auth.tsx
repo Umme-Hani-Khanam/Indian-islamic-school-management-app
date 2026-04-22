@@ -24,8 +24,8 @@ const Storage = {
   async getItemAsync(key: string): Promise<string | null> {
     try {
       if (Platform.OS === 'web') {
-        if (typeof localStorage !== 'undefined') {
-          return localStorage.getItem(key);
+        if (typeof sessionStorage !== 'undefined') {
+          return sessionStorage.getItem(key);
         }
         return null;
       } else {
@@ -39,8 +39,8 @@ const Storage = {
   async setItemAsync(key: string, value: string): Promise<void> {
     try {
       if (Platform.OS === 'web') {
-        if (typeof localStorage !== 'undefined') {
-          localStorage.setItem(key, value);
+        if (typeof sessionStorage !== 'undefined') {
+          sessionStorage.setItem(key, value);
         }
       } else {
         await SecureStore.setItemAsync(key, value);
@@ -52,8 +52,8 @@ const Storage = {
   async deleteItemAsync(key: string): Promise<void> {
     try {
       if (Platform.OS === 'web') {
-        if (typeof localStorage !== 'undefined') {
-          localStorage.removeItem(key);
+        if (typeof sessionStorage !== 'undefined') {
+          sessionStorage.removeItem(key);
         }
       } else {
         await SecureStore.deleteItemAsync(key);

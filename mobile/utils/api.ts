@@ -11,8 +11,8 @@ export const api = axios.create({
 api.interceptors.request.use(async (config) => {
   let token = null;
   if (Platform.OS === 'web') {
-    if (typeof localStorage !== 'undefined') {
-      token = localStorage.getItem('token');
+    if (typeof sessionStorage !== 'undefined') {
+      token = sessionStorage.getItem('token');
     }
   } else {
     token = await SecureStore.getItemAsync('token');
