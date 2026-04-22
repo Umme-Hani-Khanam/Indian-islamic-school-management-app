@@ -1,0 +1,25 @@
+{
+  "name": "indian-islamic-school-management-app",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "npm run dev"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Umme-Hani-Khanam/Indian-islamic-school-management-app.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/Umme-Hani-Khanam/Indian-islamic-school-management-app/issues"
+  },
+  "homepage": "https://github.com/Umme-Hani-Khanam/Indian-islamic-school-management-app#readme",
+  "dependencies": {
+    "expo": "^55.0.17",
+    "react-dom": "19.2.0"
+  }
+}

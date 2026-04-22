@@ -1,0 +1,17 @@
+# Node
+node_modules
+Dist
+/dist
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+# Expo
+**/web-build
+**/dist
+**/.expo
+**/.expo-shared
+# Environment
+.env
+.env.local
+.env.*.local

@@ -1,15 +1,20 @@
 {
   "compilerOptions": {
+<<<<<<< HEAD
     "module": "nodenext",
     "moduleResolution": "nodenext",
     "resolvePackageJsonExports": true,
     "esModuleInterop": true,
     "isolatedModules": true,
+=======
+    "module": "commonjs",
+>>>>>>> e60a51e (Fixed web errors)
     "declaration": true,
     "removeComments": true,
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
     "allowSyntheticDefaultImports": true,
+<<<<<<< HEAD
     "target": "ES2023",
     "sourceMap": true,
     "outDir": "./dist",
@@ -22,4 +27,18 @@
     "strictBindCallApply": false,
     "noFallthroughCasesInSwitch": false
   }
+=======
+    "target": "es2020",
+    "sourceMap": true,
+    "outDir": "dist",
+    "rootDir": "src",
+    "incremental": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "strictPropertyInitialization": false,
+    "ignoreDeprecations": "5.0"
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist"]
+>>>>>>> e60a51e (Fixed web errors)
 }
